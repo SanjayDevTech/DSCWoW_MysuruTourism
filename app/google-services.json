@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "931323791442",
+    "project_id": "mysuru-tourism-e604d",
+    "storage_bucket": "mysuru-tourism-e604d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:931323791442:android:fa629905f5e64dcf53778b",
+        "android_client_info": {
+          "package_name": "com.sanjaydevtech.mysurutourism"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "931323791442-mpmdpve23kl0c763gj45b5etl1e42qut.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6IXLQ3Y7a2-0A0kFKik9jhqK7kjhl1DY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "931323791442-mpmdpve23kl0c763gj45b5etl1e42qut.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

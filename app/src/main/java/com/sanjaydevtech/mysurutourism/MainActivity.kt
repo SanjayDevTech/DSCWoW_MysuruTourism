@@ -1,16 +1,24 @@
 package com.sanjaydevtech.mysurutourism
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.sanjaydevtech.mysurutourism.databinding.ActivityMainBinding
+import com.sanjaydevtech.mysurutourism.viewmodel.MainViewModel
+import com.sanjaydevtech.mysurutourism.viewmodel.MainViewModelFactory
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private val binding: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
+    private val mainViewModel: MainViewModel by viewModels {
+        MainViewModelFactory((application as MysuruApplication).repository)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,5 +36,8 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setupWithNavController(navController)
+        lifecycleScope.launch {
+            mainViewModel.fetchPlacesFromRemote()
+        }
     }
 }
