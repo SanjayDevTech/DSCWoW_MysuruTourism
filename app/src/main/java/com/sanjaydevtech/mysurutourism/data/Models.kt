@@ -12,7 +12,7 @@ data class Place(
     var desc: String = "",
     var img: String = "",
     var lat: Double = 0.0,
-    var long: Double = 0.0,
+    var lng: Double = 0.0,
     var location: String = "",
     @ColumnInfo(name = "bookmarked")
     var isBookmarked: Boolean = false,

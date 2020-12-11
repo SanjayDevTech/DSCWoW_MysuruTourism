@@ -20,10 +20,17 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val adapter = PlaceAdapter(requireContext())
+        val adapter = PlaceAdapter(requireActivity())
         binding.placeListRv.adapter = adapter
         mainViewModel.repository.placeDao().getPlacesByFeatured().observe(viewLifecycleOwner) {
             adapter.places = it
+            if (it.isEmpty()) {
+                binding.placeListRv.visibility = View.GONE
+                binding.noResultsContainer.visibility = View.VISIBLE
+            } else {
+                binding.placeListRv.visibility = View.VISIBLE
+                binding.noResultsContainer.visibility = View.GONE
+            }
         }
         return binding.root
     }
