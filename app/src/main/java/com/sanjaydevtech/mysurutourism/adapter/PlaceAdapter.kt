@@ -8,9 +8,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.facebook.shimmer.Shimmer
+import com.facebook.shimmer.ShimmerDrawable
 import com.sanjaydevtech.mysurutourism.MysuruApplication
 import com.sanjaydevtech.mysurutourism.PlaceActivity
-import com.sanjaydevtech.mysurutourism.R
 import com.sanjaydevtech.mysurutourism.data.Place
 import com.sanjaydevtech.mysurutourism.databinding.LayoutPlaceViewBinding
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,15 @@ class PlaceAdapter(private val context: AppCompatActivity) :
     private val repository by lazy {
         (context.application as MysuruApplication).repository
     }
+
+    private val shimmer =
+        Shimmer.AlphaHighlightBuilder()// The attributes for a ShimmerDrawable is set by this builder
+            .setDuration(1800) // how long the shimmering animation takes to do one full sweep
+            .setBaseAlpha(0.7f) //the alpha of the underlying children
+            .setHighlightAlpha(0.6f) // the shimmer alpha amount
+            .setDirection(Shimmer.Direction.LEFT_TO_RIGHT)
+            .setAutoStart(true)
+            .build()
 
     var places: List<Place> = listOf()
         set(value) {
@@ -38,13 +48,16 @@ class PlaceAdapter(private val context: AppCompatActivity) :
 
     override fun onBindViewHolder(holder: PlaceViewHolder, position: Int) {
         val place = places[position]
+        val shimmerDrawable = ShimmerDrawable().apply {
+            setShimmer(shimmer)
+        }
         holder.binding.apply {
             placeLocationTitle.text = place.location
             placeTitleText.text = place.title
             Glide.with(context)
                 .load(place.img)
                 .dontTransform()
-                .placeholder(R.drawable.mysuru_festival_pink)
+                .placeholder(shimmerDrawable)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(placeImg)
             placeContainer.setOnClickListener {

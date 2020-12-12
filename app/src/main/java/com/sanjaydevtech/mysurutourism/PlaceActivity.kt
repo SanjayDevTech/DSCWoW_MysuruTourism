@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.facebook.shimmer.Shimmer
+import com.facebook.shimmer.ShimmerDrawable
 import com.google.android.gms.location.*
 import com.sanjaydevtech.mysurutourism.data.Place
 import com.sanjaydevtech.mysurutourism.databinding.ActivityPlaceBinding
@@ -28,11 +30,22 @@ class PlaceActivity : AppCompatActivity() {
         MainViewModelFactory((application as MysuruApplication).repository)
     }
     private lateinit var place: Place
+    private val shimmer =
+        Shimmer.AlphaHighlightBuilder()// The attributes for a ShimmerDrawable is set by this builder
+            .setDuration(1800) // how long the shimmering animation takes to do one full sweep
+            .setBaseAlpha(0.7f) //the alpha of the underlying children
+            .setHighlightAlpha(0.6f) // the shimmer alpha amount
+            .setDirection(Shimmer.Direction.LEFT_TO_RIGHT)
+            .setAutoStart(true)
+            .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+        val shimmerDrawable = ShimmerDrawable().apply {
+            setShimmer(shimmer)
+        }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val placeId = intent.getStringExtra("place_id") ?: run { finish(); return }
         mainViewModel.repository.placeDao().getPlaceById(placeId).observe(this@PlaceActivity) {
@@ -48,7 +61,7 @@ class PlaceActivity : AppCompatActivity() {
                 Glide.with(this@PlaceActivity)
                     .load(place.img)
                     .dontTransform()
-                    .placeholder(R.drawable.mysuru_festival_pink)
+                    .placeholder(shimmerDrawable)
                     .into(binding.placeImg)
                 binding.checkbox.isChecked = place.isBookmarked
             }
