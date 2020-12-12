@@ -15,12 +15,15 @@ class MainViewModel(val repository: Repository) : ViewModel() {
     private val db = Firebase.firestore
     private val TAG = MainViewModel::class.simpleName
 
-    suspend fun fetchPlacesFromRemote() {
+    suspend fun fetchPlacesFromRemote(
+        block: Boolean = false,
+        placesWithBookmarks: List<Place> = listOf()
+    ) {
         db.collection("places").get()
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
                     val places: MutableList<Place> = mutableListOf()
-                    val documents = it.result?.documents ?: return@addOnCompleteListener
+                    val documents = task.result?.documents ?: return@addOnCompleteListener
                     for (document in documents) {
                         document.toObject(Place::class.java)?.let { it1 -> places.add(it1) }
                     }
@@ -28,10 +31,15 @@ class MainViewModel(val repository: Repository) : ViewModel() {
                         repository.placeDao().apply {
                             clear()
                             insertAll(places)
+                            if (block) {
+                                repository.placeDao()
+                                    .updateBookmarkForIds(placesWithBookmarks.map { it.id }
+                                        .toTypedArray())
+                            }
                         }
                     }
                 } else {
-                    Log.d(TAG, "Error: ${it.exception}")
+                    Log.d(TAG, "Error: ${task.exception}")
                 }
             }
     }

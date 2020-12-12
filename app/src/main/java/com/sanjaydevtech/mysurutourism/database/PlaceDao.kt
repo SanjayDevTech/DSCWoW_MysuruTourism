@@ -34,5 +34,5 @@ interface PlaceDao {
     suspend fun updateBookmark(id: String, isBookmarked: Boolean)
 
     @Query("UPDATE place SET bookmarked=:isBookmarked WHERE id IN (:ids)")
-    suspend fun updateBookmarkForIds(ids: List<String>, isBookmarked: Boolean = true)
+    suspend fun updateBookmarkForIds(ids: Array<String>, isBookmarked: Boolean = true)
 }
