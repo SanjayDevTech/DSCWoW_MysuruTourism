@@ -17,11 +17,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
+            app:collapsedSubtitleTextAppearance="@style/CollapsedSubtitleAppBar"
             app:collapsedTitleTextAppearance="@style/CollapsedAppBar"
             app:contentScrim="@color/primaryColor"
-            app:expandedTitleTextAppearance="@style/ExpandedAppBar"
-            app:collapsedSubtitleTextAppearance="@style/CollapsedSubtitleAppBar"
             app:expandedSubtitleTextAppearance="@style/ExpandedSubtitleAppBar"
+            app:expandedTitleTextAppearance="@style/ExpandedAppBar"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:titleEnabled="true"
             app:titleTextColor="@color/white">
@@ -61,31 +61,24 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/place_desc"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/maps_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="@string/locate_on_maps"
                 app:icon="@drawable/ic_baseline_location_on_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/place_desc" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <xyz.hanks.library.bang.SmallBangView
                 android:id="@+id/checkboxAnimation"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
+                android:layout_marginTop="16dp"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -100,6 +93,34 @@
                     android:clickable="false" />
 
             </xyz.hanks.library.bang.SmallBangView>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/materialTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/about"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/maps_btn"
+                app:textAllCaps="true" />
+
+            <TextView
+                android:id="@+id/place_desc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/materialTextView"
+                tools:text="Place description" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 

@@ -6,4 +6,5 @@
     <string name="title_bookmarks">Bookmarks</string>
     <string name="maps">Maps</string>
     <string name="locate_on_maps">Locate on maps</string>
+    <string name="about">About</string>
 </resources>

@@ -4,8 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -45,6 +43,7 @@ class PlaceActivity : AppCompatActivity() {
             place = it
             binding.collapsingToolbar.title = place.title
             binding.collapsingToolbar.subtitle = place.location
+            binding.placeDesc.text = place.desc
             lifecycleScope.launch {
                 Glide.with(this@PlaceActivity)
                     .load(place.img)
@@ -94,18 +93,6 @@ class PlaceActivity : AppCompatActivity() {
                     requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                 }
             }
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.place_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_maps -> true
-            else -> super.onOptionsItemSelected(item)
         }
     }
 
