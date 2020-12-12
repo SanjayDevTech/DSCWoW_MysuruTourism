@@ -36,7 +36,6 @@ class PlaceActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "No title"
         val placeId = intent.getStringExtra("place_id") ?: run { finish(); return }
         mainViewModel.repository.placeDao().getPlaceById(placeId).observe(this@PlaceActivity) {
             if (it == null) {
@@ -44,9 +43,8 @@ class PlaceActivity : AppCompatActivity() {
                 return@observe
             }
             place = it
-            supportActionBar?.let { actionBar ->
-                actionBar.title = place.title
-            } ?: run { Toast.makeText(this, "No subtitle", Toast.LENGTH_SHORT).show() }
+            binding.collapsingToolbar.title = place.title
+            binding.collapsingToolbar.subtitle = place.location
             lifecycleScope.launch {
                 Glide.with(this@PlaceActivity)
                     .load(place.img)

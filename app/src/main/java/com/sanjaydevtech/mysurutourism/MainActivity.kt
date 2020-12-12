@@ -37,7 +37,11 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setupWithNavController(navController)
         lifecycleScope.launch {
+            val placesWithBookmarks =
+                mainViewModel.repository.placeDao().getPlacesByBookmarked(true)
             mainViewModel.fetchPlacesFromRemote()
+            mainViewModel.repository.placeDao()
+                .updateBookmarkForIds(placesWithBookmarks.map { it.id })
         }
     }
 }

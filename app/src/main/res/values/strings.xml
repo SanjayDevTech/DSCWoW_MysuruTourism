@@ -3,7 +3,7 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="title_home">Home</string>
     <string name="title_search">Search</string>
-    <string name="title_maps">Maps</string>
+    <string name="title_bookmarks">Bookmarks</string>
     <string name="maps">Maps</string>
     <string name="locate_on_maps">Locate on maps</string>
 </resources>

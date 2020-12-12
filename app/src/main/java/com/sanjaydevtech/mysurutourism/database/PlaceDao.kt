@@ -24,9 +24,15 @@ interface PlaceDao {
     @Query("DELETE FROM place")
     suspend fun clear()
 
-    @Query("SELECT * FROM place WHERE featured=:isFeatured LIMIT 10")
-    fun getPlacesByFeatured(isFeatured: Boolean = true): LiveData<List<Place>>
+    @Query("SELECT * FROM place WHERE featured=:isFeatured LIMIT :limit")
+    fun getPlacesByFeatured(isFeatured: Boolean = true, limit: Int = 10): LiveData<List<Place>>
+
+    @Query("SELECT * FROM place WHERE bookmarked=:isBookmarked")
+    suspend fun getPlacesByBookmarked(isBookmarked: Boolean = true): List<Place>
 
     @Query("UPDATE place SET bookmarked=:isBookmarked WHERE id=:id")
     suspend fun updateBookmark(id: String, isBookmarked: Boolean)
+
+    @Query("UPDATE place SET bookmarked=:isBookmarked WHERE id IN (:ids)")
+    suspend fun updateBookmarkForIds(ids: List<String>, isBookmarked: Boolean = true)
 }
