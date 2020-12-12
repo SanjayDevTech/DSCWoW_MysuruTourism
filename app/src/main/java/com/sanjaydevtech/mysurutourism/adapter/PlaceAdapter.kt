@@ -1,19 +1,28 @@
 package com.sanjaydevtech.mysurutourism.adapter
 
-import android.app.Activity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.sanjaydevtech.mysurutourism.MysuruApplication
 import com.sanjaydevtech.mysurutourism.PlaceActivity
 import com.sanjaydevtech.mysurutourism.R
 import com.sanjaydevtech.mysurutourism.data.Place
 import com.sanjaydevtech.mysurutourism.databinding.LayoutPlaceViewBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class PlaceAdapter(private val context: Activity) :
+class PlaceAdapter(private val context: AppCompatActivity) :
     RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder>() {
+
+    private val repository by lazy {
+        (context.application as MysuruApplication).repository
+    }
 
     var places: List<Place> = listOf()
         set(value) {
@@ -45,9 +54,12 @@ class PlaceAdapter(private val context: Activity) :
             }
             checkbox.isChecked = place.isBookmarked
             checkboxAnimation.setOnClickListener {
-                checkbox.isChecked = !place.isBookmarked
-                checkboxAnimation.likeAnimation()
-                place.isBookmarked = checkbox.isChecked
+                context.lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        repository.placeDao().updateBookmark(place.id, !place.isBookmarked)
+                    }
+                    checkboxAnimation.likeAnimation()
+                }
             }
         }
     }

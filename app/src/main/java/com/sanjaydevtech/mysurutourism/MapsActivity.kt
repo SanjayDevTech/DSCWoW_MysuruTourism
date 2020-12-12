@@ -1,21 +1,29 @@
 package com.sanjaydevtech.mysurutourism
 
+import android.Manifest
 import android.content.IntentSender
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.location.Location
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.location.SettingsClient
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
 import com.sanjaydevtech.mysurutourism.databinding.ActivityMapsBinding
@@ -25,7 +33,21 @@ class MapsActivity : AppCompatActivity() {
     private val binding: ActivityMapsBinding by lazy {
         ActivityMapsBinding.inflate(layoutInflater)
     }
+    private val fusedLocationClient: FusedLocationProviderClient by lazy {
+        LocationServices.getFusedLocationProviderClient(this)
+    }
+    private val locationRequest by lazy {
+        LocationRequest.create().apply {
+            interval = 10000
+            fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+    }
+    private var requestingLocationUpdates = false
+    private lateinit var currentLocation: Location
+    private lateinit var locationCallback: LocationCallback
     private var isClicked = false
+    private var currMarker: Marker? = null
     private val rotateOpen: Animation by lazy {
         AnimationUtils.loadAnimation(
             this,
@@ -54,12 +76,15 @@ class MapsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val supportMapFragment =
             supportFragmentManager.findFragmentById(R.id.maps_fragment_container) as SupportMapFragment
         val latDouble = intent.getDoubleExtra("lat", 0.0)
         val longDouble = intent.getDoubleExtra("long", 0.0)
         val placeTitle = intent.getStringExtra("title") ?: run { finish(); return }
-        Log.d("MapsActivity", "Lat: $latDouble, Long: $longDouble")
+        supportActionBar?.title = placeTitle
+        //Log.d("MapsActivity", "Lat: $latDouble, Long: $longDouble")
         val latLong = LatLng(latDouble, longDouble)
         supportMapFragment.getMapAsync {
             it.uiSettings.apply {
@@ -68,16 +93,43 @@ class MapsActivity : AppCompatActivity() {
                 isIndoorLevelPickerEnabled = true
             }
             val markerOptions = MarkerOptions().position(latLong).title(placeTitle)
+                .icon(
+                    BitmapDescriptorFactory.fromBitmap(
+                        Bitmap.createScaledBitmap(
+                            (ContextCompat.getDrawable(
+                                this,
+                                R.drawable.tourist_place
+                            ) as BitmapDrawable).bitmap, 80, 80, false
+                        )
+                    )
+                )
             it.addMarker(markerOptions)
             it.moveCamera(CameraUpdateFactory.newLatLngZoom(latLong, 12.0f))
         }
-        val locationRequest = LocationRequest.create().apply {
-            interval = 10000
-            fastestInterval = 5000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                for (location in locationResult.locations) {
+                    requestingLocationUpdates = false
+                    currentLocation = location
+                    Log.d("MapsActivity", "onLocationRetrieved")
+                    stopLocationUpdates()
+                    lifecycleScope.launch {
+                        val currLatLng = LatLng(location.latitude, location.longitude)
+
+                        supportMapFragment.awaitMap().apply {
+                            currMarker?.remove()
+                            currMarker = addMarker(
+                                MarkerOptions().position(currLatLng).title("Your Location")
+                            )
+                            animateCamera(CameraUpdateFactory.newLatLngZoom(currLatLng, 12.0f))
+                        }
+
+                    }
+                }
+            }
         }
         val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
         val client: SettingsClient = LocationServices.getSettingsClient(this)
         binding.optionsFab.setOnClickListener {
             if (!isClicked) {
@@ -104,14 +156,23 @@ class MapsActivity : AppCompatActivity() {
         binding.routeFab.setOnClickListener {
             client.checkLocationSettings(builder.build())
                 .addOnSuccessListener {
-
+                    Log.d("MapsActivity", "In onSuccessListener")
+                    if (it.locationSettingsStates.isGpsUsable) {
+                        requestingLocationUpdates = true
+                        startLocationUpdates()
+                    } else {
+                        requestingLocationUpdates = false
+                        Toast.makeText(this, "Location is disabled", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 .addOnFailureListener {
                     if (it is ResolvableApiException) {
                         try {
                             it.startResolutionForResult(this@MapsActivity, 777)
+                            Log.d("MapsActivity", "In onFailureListener: Try")
                         } catch (sendEx: IntentSender.SendIntentException) {
                             // Ignore the error.
+                            Log.d("MapsActivity", "In onFailureListener: catch")
                         }
                     }
                 }
@@ -119,5 +180,40 @@ class MapsActivity : AppCompatActivity() {
 
     }
 
-    // TODO https://developer.android.com/training/location/request-updates#kotlin
+    override fun onResume() {
+        super.onResume()
+        if (requestingLocationUpdates) startLocationUpdates()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopLocationUpdates()
+    }
+
+    private fun startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
+    }
+
+    private fun stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
+    }
 }

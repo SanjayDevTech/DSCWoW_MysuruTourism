@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -36,18 +35,35 @@ class PlaceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "No title"
         val placeId = intent.getStringExtra("place_id") ?: run { finish(); return }
-        lifecycleScope.launch(Dispatchers.IO) {
-            mainViewModel.repository.placeDao().getPlaceById(placeId)?.let {
-                place = it
-                Log.d("PlaceActivity", place.toString())
-                withContext(Dispatchers.Main) {
-                    Glide.with(this@PlaceActivity)
-                        .load(it.img)
-                        .dontTransform()
-                        .placeholder(R.drawable.mysuru_festival_pink)
-                        .into(binding.placeImg)
+        mainViewModel.repository.placeDao().getPlaceById(placeId).observe(this@PlaceActivity) {
+            if (it == null) {
+                finish()
+                return@observe
+            }
+            place = it
+            supportActionBar?.let { actionBar ->
+                actionBar.title = place.title
+            } ?: run { Toast.makeText(this, "No subtitle", Toast.LENGTH_SHORT).show() }
+            lifecycleScope.launch {
+                Glide.with(this@PlaceActivity)
+                    .load(place.img)
+                    .dontTransform()
+                    .placeholder(R.drawable.mysuru_festival_pink)
+                    .into(binding.placeImg)
+                binding.checkbox.isChecked = place.isBookmarked
+            }
+        }
+
+        binding.checkboxAnimation.setOnClickListener {
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    mainViewModel.repository.placeDao()
+                        .updateBookmark(place.id, !place.isBookmarked)
                 }
+                binding.checkboxAnimation.likeAnimation()
             }
         }
         val requestPermissionLauncher =
@@ -93,5 +109,10 @@ class PlaceActivity : AppCompatActivity() {
             R.id.action_maps -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
     }
 }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.sanjaydevtech.mysurutourism.adapter.PlaceAdapter
@@ -20,7 +21,7 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val adapter = PlaceAdapter(requireActivity())
+        val adapter = PlaceAdapter(requireActivity() as AppCompatActivity)
         binding.placeListRv.adapter = adapter
         mainViewModel.repository.placeDao().getPlacesByFeatured().observe(viewLifecycleOwner) {
             adapter.places = it

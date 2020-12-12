@@ -13,7 +13,7 @@ interface PlaceDao {
     fun getAllPlaces(): LiveData<List<Place>>
 
     @Query("SELECT * FROM place WHERE id=:id")
-    suspend fun getPlaceById(id: String): Place?
+    fun getPlaceById(id: String): LiveData<Place>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(place: Place)
@@ -26,4 +26,7 @@ interface PlaceDao {
 
     @Query("SELECT * FROM place WHERE featured=:isFeatured LIMIT 10")
     fun getPlacesByFeatured(isFeatured: Boolean = true): LiveData<List<Place>>
+
+    @Query("UPDATE place SET bookmarked=:isBookmarked WHERE id=:id")
+    suspend fun updateBookmark(id: String, isBookmarked: Boolean)
 }
