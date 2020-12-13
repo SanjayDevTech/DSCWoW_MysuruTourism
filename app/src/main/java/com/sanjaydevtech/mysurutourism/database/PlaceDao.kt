@@ -12,6 +12,9 @@ interface PlaceDao {
     @Query("SELECT * FROM place")
     fun getAllPlaces(): LiveData<List<Place>>
 
+    @Query("SELECT * FROM place LIMIT :limit")
+    suspend fun getLimitedPlaces(limit: Int = 10): List<Place>
+
     @Query("SELECT * FROM place WHERE id=:id")
     fun getPlaceById(id: String): LiveData<Place>
 
@@ -23,6 +26,12 @@ interface PlaceDao {
 
     @Query("DELETE FROM place")
     suspend fun clear()
+
+    @Query("SELECT * FROM place WHERE category=:category")
+    fun getPlaceByCategory(category: String = "other"): LiveData<List<Place>>
+
+    @Query("SELECT * FROM place WHERE title LIKE :search OR location LIKE :search")
+    suspend fun searchPlaceByTitle(search: String): List<Place>
 
     @Query("SELECT * FROM place WHERE featured=:isFeatured LIMIT :limit")
     fun getPlacesByFeatured(isFeatured: Boolean = true, limit: Int = 10): LiveData<List<Place>>

@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.sanjaydevtech.mysurutourism.adapter.CategoryAdapter
 import com.sanjaydevtech.mysurutourism.adapter.PlaceAdapter
+import com.sanjaydevtech.mysurutourism.data.DataSource
 import com.sanjaydevtech.mysurutourism.databinding.FragmentHomeBinding
 import com.sanjaydevtech.mysurutourism.viewmodel.MainViewModel
 
@@ -22,14 +24,17 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val adapter = PlaceAdapter(requireActivity() as AppCompatActivity)
+        val categoryAdapter = CategoryAdapter(requireActivity() as AppCompatActivity)
+        binding.categoryListRv.adapter = categoryAdapter
         binding.placeListRv.adapter = adapter
+        categoryAdapter.categories = DataSource.getCategories()
         mainViewModel.repository.placeDao().getPlacesByFeatured().observe(viewLifecycleOwner) {
             adapter.places = it
             if (it.isEmpty()) {
-                binding.placeListRv.visibility = View.GONE
+                binding.rvContainer.visibility = View.GONE
                 binding.noResultsContainer.visibility = View.VISIBLE
             } else {
-                binding.placeListRv.visibility = View.VISIBLE
+                binding.rvContainer.visibility = View.VISIBLE
                 binding.noResultsContainer.visibility = View.GONE
             }
         }

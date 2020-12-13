@@ -7,4 +7,6 @@
     <string name="maps">Maps</string>
     <string name="locate_on_maps">Locate on maps</string>
     <string name="about">About</string>
+    <string name="no_results_found">No results found</string>
+    <string name="explore_new_places">Explore new places</string>
 </resources>
